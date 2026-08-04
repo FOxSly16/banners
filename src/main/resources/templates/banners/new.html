@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<a th:href="@{/banner}">Banners</a>
+&nbsp;
+<a th:href="@{/category}">Categories</a>
+<br/>
+<br/>
+
+
+<b>Banners</b>
+<br/>
+
+
+<form th:method="GET" th:action="@{/banner}">
+    <label for="query">Enter banner name</label>
+    <input type="text" name="query" id="query">
+    <input type="submit" value="Search">
+</form>
+
+
+<div th:each="banner: ${banners}">
+    <a th:href="@{/banner/{id}(id=${banner.getId()})}" th:text="${banner.getName()}" >banner</a>
+</div>
+<br/>
+<br/>
+
+
+<p> Create new banner</p>
+
+
+<form th:method="POST" th:action="@{/banner}" th:object="${banner}">
+    <label for="name">Name</label>
+    <input type="text" th:field="*{name}" id="name">
+    <div style="color:red" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Name error</div>
+    <br/>
+    <label for="price">Price</label>
+    <input type="text" th:field="*{price}" id="price">
+    <div style="color:red" th:if="${#fields.hasErrors('price')}" th:errors="*{price}">ReqName error</div>
+    <br/>
+    <label for="category">Category</label>
+    <select th:field="*{category.id}" id="category">
+        <option th:each="category : ${categories}" th:value="${category.getId()}" th:text="${category.getName()}">
+        </option>
+    </select>
+    <br/>
+    <label for="content">Text</label>
+    <input type="text" th:field="*{content}" id="content">
+    <div style="color:red" th:if="${#fields.hasErrors('content')}" th:errors="*{content}">Content error</div>
+    <br/>
+    <input type="submit" value="Save">
+</form>
+
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<a th:href="@{/banner}">Banners</a>
+&nbsp;
+<a th:href="@{/category}">Categories</a>
+<br/>
+<br/>
+
+<b>Banners</b>
+<br/>
+
+<form th:method="GET" th:action="@{/banner}">
+    <label for="query">Enter banner name</label>
+    <input type="text" name="query" id="query">
+    <input type="submit" value="Искать">
+</form>
+
+<div th:each="banner: ${banners}">
+    <a th:href="@{/banner/{id}(id=${banner.getId()})}" th:text="${banner.getName()}" >banner</a>
+</div>
+
+
+<div th:unless="${#lists.isEmpty(foundedBanners)}">
+    <div th:each="banner: ${foundedBanners}">
+        <a th:href="@{/banner/{id}(id=${banner.getId()})}" th:text="${banner.getName()}" >banner</a>
+    </div>
+</div>
+
+
+
+<div th:if="${searched and #lists.isEmpty(foundedBanners)}">
+    <p>Banners are not found</p>
+</div>
+
+
+
+<form th:method="GET" th:action="@{/banner/new}">
+    <input type="submit" value="Create new banner">
+</form>
+
+
+
+
+
+</body>
+</html>

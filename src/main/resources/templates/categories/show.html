@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<a th:href="@{/banner}">Banners</a>
+&nbsp;
+<a th:href="@{/category}">Categories</a>
+<br/>
+<br/>
+
+
+<b>Categories</b>
+<br/>
+
+
+<form th:method="GET" th:action="@{/category}">
+    <label for="query">Enter category name</label>
+    <input type="text" name="query" id="query">
+    <input type="submit" value="Search">
+</form>
+<br/>
+<hr/>
+
+
+<p th:text="${categoryName}" ></p>
+
+<div th:if="${tryToDelete}">
+    <hr/>
+    <h1>Delete error</h1>
+</div>
+
+<div th:if="${tryToDelete}" th:each="banner : ${bannersTryToDelete}">
+    <div th:text="${banner.getId()}"></div>
+</div>
+
+<div th:if="${tryToDelete}">
+    <hr/>
+    <h1></h1>
+</div>
+
+
+<form th:method="PATCH" th:action="@{/category/{id}(id=${category.getId()})}" th:object="${category}">
+    <label for="categoryName">Name</label>
+    <input type="text" th:field="*{name}" id="categoryName">
+    <div style="color:red" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Title error</div>
+    <br/>
+    <label for="reqName">Request ID</label>
+    <input type="text" th:field="*{reqName}" id="reqName">
+    <div style="color:red" th:if="${#fields.hasErrors('reqName')}" th:errors="*{reqName}">Title error</div>
+    <br/>
+    <input type="submit" value="Update">
+</form>
+
+
+<form th:method="DELETE" th:action="@{/category/{id}(id=${category.getId()})}">
+    <input type="submit" value="Delete">
+</form>
+
+<hr/>
+
+<div th:each="category: ${categories}">
+    <a th:href="@{/category/{id}(id=${category.getId()})}" th:text="${category.getName()}" >category</a>
+</div>
+
+<form th:method="GET" th:action="@{/category/new}">
+    <input type="submit" value="Create new category">
+</form>
+
+
+</body>
+</html>

@@ -14,7 +14,7 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
 
     Optional<Category> findByName(String name);
 
-    Optional<Category> findByReqName(String name);
+    Optional<Category> findByReqName(String reqName);
 
     @Query("SELECT c FROM Category c WHERE c.deleted = false AND LOWER(c.name) LIKE CONCAT(LOWER(:query), '%')")
     List<Category> findByQuery(String query);
@@ -27,4 +27,5 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
 
     Optional<Category> findByBanners_Id(int id);
 
+    Optional<Category> findByReqNameAndDeletedFalse(String reqName);
 }

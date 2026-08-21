@@ -8,6 +8,7 @@ import ru.soliev.practice.banners.models.Banner;
 import ru.soliev.practice.banners.models.Category;
 
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ListResourceBundle;
 import java.util.Optional;
@@ -27,5 +28,13 @@ public interface BannerRepository extends JpaRepository<Banner, Integer> {
     @Query("SELECT b FROM Banner b WHERE b.deleted = false AND LOWER(b.name) LIKE CONCAT(LOWER(:query), '%')")
     List<Banner> findByQuery(String query);
 
-    List<Banner> findByCategory_IdAndDeletedFalseOrderByPriceDesc(int id);
+    List<Banner> findByCategory_IdAndDeletedFalseOrderByPriceDesc(int categoryId);
+
+    List<Banner> findByCategory_IdAndDeletedFalse(int categoryId);
+
+    Boolean existsByCategory_IdAndDeletedFalse(int categoryId);
+
+    @Query("SELECT DISTINCT b FROM Banner b LEFT JOIN FETCH b.requests r WHERE b.category.id = :categoryId " +
+            "AND b.deleted = false ORDER BY b.price DESC")
+    List<Banner> findByCategoryIdWithRequests(int categoryId, LocalDateTime twoMinutesAgo);
 }

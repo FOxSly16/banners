@@ -31,7 +31,7 @@ public class UpdateCategoryValidator implements Validator {
         }
 
         if (categoryService.findByReqNameExceptThisId(updatedCategory.getReqName(), updatedCategory.getId()) != null) {
-            errors.rejectValue("name", "", "This reqName is already taken");
+            errors.rejectValue("reqName", "", "This reqName is already taken");
         }
     }
 }

@@ -1,13 +1,10 @@
 package ru.soliev.practice.banners.models;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import org.hibernate.annotations.TypeBinderType;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
 @Table(name = "Banner")
@@ -19,13 +16,9 @@ public class Banner {
     private int id;
 
     @Column(name = "name")
-    @NotBlank
     private String name;
 
     @Column(name = "price")
-    @NotNull(message = "Enter the price")
-    @Min(value = 0, message = "Price must be greater then 0")
-    @Max(value = 100_000, message = "Price must be less then 100_000")
     private BigDecimal price;
 
 
@@ -34,12 +27,14 @@ public class Banner {
     private Category category;
 
     @Column(name = "content")
-    @NotBlank
     private String content;
 
     @Column(name = "deleted")
     @NotNull
     private boolean deleted;
+
+    @OneToMany(mappedBy = "banner", fetch = FetchType.LAZY)
+    private List<Request> requests;
 
     public Banner () {}
 
@@ -91,5 +86,11 @@ public class Banner {
         this.price = price;
     }
 
+    public List<Request> getRequests() {
+        return requests;
+    }
 
+    public void setRequests(List<Request> requests) {
+        this.requests = requests;
+    }
 }

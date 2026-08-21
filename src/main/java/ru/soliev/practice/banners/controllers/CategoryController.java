@@ -1,109 +1,112 @@
 package ru.soliev.practice.banners.controllers;
 
 import jakarta.validation.Valid;
+import org.mapstruct.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import ru.soliev.practice.banners.Mappers.CategoryMapper;
+import ru.soliev.practice.banners.dto.CategoryDTO;
+import ru.soliev.practice.banners.exceptions.CategoryNotCreatedException;
 import ru.soliev.practice.banners.exceptions.CategoryNotFoundException;
+import ru.soliev.practice.banners.exceptions.CategoryNotUpdatedException;
+import ru.soliev.practice.banners.models.Banner;
 import ru.soliev.practice.banners.models.Category;
 import ru.soliev.practice.banners.services.CategoryService;
 import ru.soliev.practice.banners.util.CreateCategoryValidator;
 import ru.soliev.practice.banners.util.UpdateCategoryValidator;
 
-@Controller
+import java.util.List;
+
+@RestController
 @RequestMapping("/category")
 public class CategoryController {
 
     private final CategoryService categoryService;
     private final CreateCategoryValidator createCategoryValidator;
     private final UpdateCategoryValidator updateCategoryValidator;
+    private final CategoryMapper categoryMapper;
 
     @Autowired
-    public CategoryController(CategoryService categoryService, CreateCategoryValidator createCategoryValidator, UpdateCategoryValidator updateCategoryValidator) {
+    public CategoryController(CategoryService categoryService, CreateCategoryValidator createCategoryValidator, UpdateCategoryValidator updateCategoryValidator, CategoryMapper categoryMapper) {
         this.categoryService = categoryService;
         this.createCategoryValidator = createCategoryValidator;
         this.updateCategoryValidator = updateCategoryValidator;
+        this.categoryMapper = categoryMapper;
     }
 
     @GetMapping
-    public String index(@RequestParam(value = "query", required = false) String query, Model model) {
+    public List<CategoryDTO> index(@RequestParam(value = "query", required = false) String query) throws CategoryNotFoundException {
 
-        model.addAttribute("searched", false);
-
-        if (query != null) {
-            model.addAttribute("searched", true);
-            model.addAttribute("foundedCategories", categoryService.search(query));
-        } else
-            model.addAttribute("categories", categoryService.findAll());
-
-        return "categories/index";
+        if (query != null)
+            return categoryMapper.toCategoryDTOList(categoryService.search(query));
+        return categoryMapper.toCategoryDTOList(categoryService.findAll());
     }
 
     @GetMapping("/{id}")
-    public String show(Model model, @PathVariable ("id") int id) throws CategoryNotFoundException {
-        model.addAttribute("categories", categoryService.findAll());
-        model.addAttribute("category", categoryService.findById(id));
-        model.addAttribute("categoryName", categoryService.findById(id).getName());
-        return "categories/show";
-    }
-
-    @GetMapping("/new")
-    public String newCategory(@ModelAttribute ("category") Category category, Model model) {
-        model.addAttribute("categories", categoryService.findAll());
-        return "categories/new";
+    public CategoryDTO show(@PathVariable ("id") int id) throws CategoryNotFoundException {
+        return categoryMapper.toCategoryDTO(categoryService.findById(id));
     }
 
     @PostMapping()
-    public String create(@ModelAttribute("category") @Valid Category category, BindingResult bindingResult, Model model) {
+    public ResponseEntity<Integer> create(@RequestBody @Valid CategoryDTO categoryDTO, BindingResult bindingResult) throws CategoryNotCreatedException {
+
+        Category category = categoryMapper.toEntity(categoryDTO);
 
         createCategoryValidator.validate(category, bindingResult);
 
         if (bindingResult.hasErrors()) {
-            model.addAttribute("categories", categoryService.findAll());
-            return "categories/new";
+            throw new CategoryNotCreatedException(createErrorMsg(bindingResult));
         }
 
         categoryService.save(category);
-        return "redirect:/category";
+        return new ResponseEntity<>(category.getId(), HttpStatus.OK);
     }
 
     @PatchMapping("/{id}")
-    public String update(@ModelAttribute ("category") @Valid Category updatedCategory,
-                         BindingResult bindingResult, Model model,
-                         @PathVariable("id") int id) throws CategoryNotFoundException {
+    public ResponseEntity<HttpStatus> update(@RequestBody @Valid CategoryDTO updatedCategoryDTO,
+                                             BindingResult bindingResult,
+                                             @PathVariable("id") int id) throws CategoryNotFoundException, CategoryNotUpdatedException {
 
+        Category updatedCategory = categoryMapper.toEntity(updatedCategoryDTO);
         updatedCategory.setId(id);
 
         updateCategoryValidator.validate(updatedCategory, bindingResult);
 
         if (bindingResult.hasErrors()) {
-            model.addAttribute("categories", categoryService.findAll());
-            model.addAttribute("categoryName", categoryService.findById(id).getName());
-            return "categories/show";
+            throw new CategoryNotUpdatedException(createErrorMsg(bindingResult));
         }
 
         categoryService.update(id, updatedCategory);
-        return "redirect:/category";
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public String delete(@PathVariable("id") int id, Model model) throws CategoryNotFoundException {
+    public ResponseEntity<List<Integer>> delete(@PathVariable("id") int id) throws CategoryNotFoundException {
 
-        Category category = categoryService.findById(id);
-        if (!category.getBanners().stream().filter(banner -> !banner.isDeleted()).toList().isEmpty()) {
+        List<Banner> banners = categoryService.delete(id);
 
-            model.addAttribute("category", category);
-            model.addAttribute("tryToDelete", true);
-            model.addAttribute("bannersTryToDelete", category.getBanners());
-            model.addAttribute("categories", categoryService.findAll());
-            model.addAttribute("categoryName", category.getName());
-            return "categories/show";
+        if (!banners.isEmpty())
+            return new ResponseEntity<>(banners.stream().map(Banner::getId).toList(), HttpStatus.CONFLICT);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    public String createErrorMsg(BindingResult bindingResult) {
+        StringBuilder msg = new StringBuilder();
+        List<FieldError> errors = bindingResult.getFieldErrors();
+
+        for (FieldError error : errors) {
+            msg.append(error.getField()).append(" - ").append(error.getDefaultMessage()).append("; ");
         }
 
-        categoryService.delete(id);
-        return "redirect:/category";
+        return msg.toString();
     }
 
 }

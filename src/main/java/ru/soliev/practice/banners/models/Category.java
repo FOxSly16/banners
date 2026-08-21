@@ -18,11 +18,9 @@ public class Category {
     private int id;
 
     @Column(name = "name")
-    @NotBlank
     private String name;
 
     @Column(name = "req_name")
-    @NotBlank
     private String reqName;
 
     @Column(name = "deleted")

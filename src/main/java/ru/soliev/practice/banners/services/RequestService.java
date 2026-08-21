@@ -55,9 +55,14 @@ public class RequestService{
         return !requests.isEmpty();
     }
 
-    public Banner showBanner(List<Banner> banners, Request request) {
+    public boolean hasShowed(Banner banner) {
+        return !banner.getRequests().stream().filter(request -> request.getTime().isAfter(LocalDateTime.now().minusMinutes(2))
+                || request.getTime().equals(LocalDateTime.now().minusMinutes(2))).toList().isEmpty();
+    }
+
+    public Banner showBanner(List<Banner> banners) {
         for (Banner banner : banners) {
-            if (!hasBannerShowed(banner.getId(), request)) {
+            if (!hasShowed(banner)) {
                 return banner;
             }
         }

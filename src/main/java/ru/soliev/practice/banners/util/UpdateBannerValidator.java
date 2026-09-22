@@ -33,4 +33,10 @@ public class UpdateBannerValidator implements Validator {
             errors.rejectValue("name", "", "This name is already taken");
         }
     }
+
+    public void validate(int bannerId, String bannerName, Errors errors) {
+        if (bannerService.findByNameExceptThisId(bannerName, bannerId) != null) {
+            errors.rejectValue("name", "", "This name is already taken");
+        }
+    }
 }

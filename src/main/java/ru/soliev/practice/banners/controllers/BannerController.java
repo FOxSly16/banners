@@ -7,15 +7,16 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import ru.soliev.practice.banners.Mappers.BannerMapper;;
-import ru.soliev.practice.banners.dto.BannerCreateDTO;
+import ru.soliev.practice.banners.dto.CreateBannerDTO;
 import ru.soliev.practice.banners.dto.BannerShortDTO;
 import ru.soliev.practice.banners.dto.BannerDTO;
+import ru.soliev.practice.banners.dto.UpdateBannerDTO;
 import ru.soliev.practice.banners.exceptions.BannerNotCreatedException;
 import ru.soliev.practice.banners.exceptions.BannerNotFoundException;
 import ru.soliev.practice.banners.exceptions.BannerNotUpdatedException;
 import ru.soliev.practice.banners.exceptions.CategoryNotFoundException;
+import ru.soliev.practice.banners.managers.BannerManager;
 import ru.soliev.practice.banners.models.Banner;
-import ru.soliev.practice.banners.models.Category;
 import ru.soliev.practice.banners.services.BannerService;
 import ru.soliev.practice.banners.services.CategoryService;
 import ru.soliev.practice.banners.util.CreateBannerValidator;
@@ -24,22 +25,22 @@ import ru.soliev.practice.banners.util.UpdateBannerValidator;
 import java.util.List;
 
 @RestController
-@RequestMapping("/banner")
+@RequestMapping("/banners")
 public class BannerController {
 
     private final BannerService bannerService;
     private final CreateBannerValidator createBannerValidator;
     private final UpdateBannerValidator updateBannerValidator;
     private final BannerMapper bannerMapper;
-    private final CategoryService categoryService;
+    private final BannerManager bannerManager;
 
     public BannerController(BannerService bannerService, CreateBannerValidator createBannerValidator,
-                            UpdateBannerValidator updateBannerValidator, CategoryService categoryService, BannerMapper bannerMapper, CategoryService categoryService1) {
+                            UpdateBannerValidator updateBannerValidator, CategoryService categoryService, BannerMapper bannerMapper, CategoryService categoryService1, BannerManager bannerManager) {
         this.bannerService = bannerService;
         this.createBannerValidator = createBannerValidator;
         this.updateBannerValidator = updateBannerValidator;
         this.bannerMapper = bannerMapper;
-        this.categoryService = categoryService1;
+        this.bannerManager = bannerManager;
     }
 
     @GetMapping
@@ -54,58 +55,46 @@ public class BannerController {
     @GetMapping("/{id}")
     public BannerDTO getBannerById(@PathVariable ("id") int id) throws BannerNotFoundException, CategoryNotFoundException {
 
-        BannerDTO bannerDTO = bannerMapper.toBannerDTO(bannerService.findById(id));
-        bannerDTO.setCategoryId(categoryService.findByBannerId(id).getId());
-        return bannerDTO;
+        return bannerMapper.toBannerDTO(bannerService.findById(id));
 
     }
 
 
     @PostMapping()
-    public ResponseEntity<Integer> create(@RequestBody @Valid BannerCreateDTO bannerCreateDTO, BindingResult bindingResult) throws CategoryNotFoundException, BannerNotCreatedException {
+    public ResponseEntity<Integer> create(@RequestBody @Valid CreateBannerDTO createBannerDTO, BindingResult bindingResult) throws CategoryNotFoundException, BannerNotCreatedException {
 
-        Category category = categoryService.findByName(bannerCreateDTO.getCategoryName());
-        if (category == null)
-            throw new CategoryNotFoundException("Category with name " + bannerCreateDTO.getCategoryName() + " was not found");
-        Banner banner = bannerMapper.toEntity(bannerCreateDTO);
-        createBannerValidator.validate(banner, bindingResult);
+        createBannerValidator.validate(createBannerDTO.getName(), bindingResult);
 
         if (bindingResult.hasErrors()) {
-            throw new BannerNotCreatedException(createErrorMsg(bindingResult));// TODO придумать exception, сформировать msg
+            throw new BannerNotCreatedException(createErrorMsg(bindingResult));//
         }
 
-        banner.setCategory(category);
-        bannerService.save(banner);
+        Banner banner = bannerManager.createBanner(createBannerDTO);
         return new ResponseEntity<>(banner.getId(), HttpStatus.OK);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<HttpStatus> update(@RequestBody @Valid BannerCreateDTO updatedBannerDTO,
-                         BindingResult bindingResult,
-                         @PathVariable("id") int id) throws CategoryNotFoundException, BannerNotFoundException, BannerNotUpdatedException {
+    @ResponseStatus(HttpStatus.OK)
+    public void update(@RequestBody @Valid UpdateBannerDTO updateBannerDTO,
+                       BindingResult bindingResult,
+                       @PathVariable("id") int id) throws CategoryNotFoundException, BannerNotFoundException, BannerNotUpdatedException {
 
+        if (updateBannerDTO.getName() != null) {
 
-        Banner updatedBanner = bannerMapper.toEntity(updatedBannerDTO);
-        int categoryId = categoryService.findByName(updatedBannerDTO.getCategoryName()).getId();
-        updatedBanner.setId(id);
-
-        updateBannerValidator.validate(updatedBanner, bindingResult);
+            updateBannerValidator.validate(id, updateBannerDTO.getName(), bindingResult);
+        }
 
         if (bindingResult.hasErrors()){
             throw new BannerNotUpdatedException(createErrorMsg(bindingResult));
         }
 
-        updatedBanner.setCategory(categoryService.findByName(updatedBanner.getName()));
-        bannerService.update(id, updatedBanner, categoryId);
-        return new ResponseEntity<>(HttpStatus.OK);
+        bannerService.update(id, updateBannerDTO);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<HttpStatus> delete(@PathVariable("id") int id) throws BannerNotFoundException {
-
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable("id") int id) throws BannerNotFoundException {
         bannerService.delete(id);
-        return new ResponseEntity<>(HttpStatus.OK);
-
     }
 
     public String createErrorMsg(BindingResult bindingResult) {

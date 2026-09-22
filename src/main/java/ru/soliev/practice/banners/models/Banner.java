@@ -30,7 +30,6 @@ public class Banner {
     private String content;
 
     @Column(name = "deleted")
-    @NotNull
     private boolean deleted;
 
     @OneToMany(mappedBy = "banner", fetch = FetchType.LAZY)

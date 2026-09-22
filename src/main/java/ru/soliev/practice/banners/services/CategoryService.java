@@ -5,9 +5,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.thymeleaf.expression.Lists;
+import ru.soliev.practice.banners.dto.UpdateCategoryDTO;
 import ru.soliev.practice.banners.exceptions.CategoryNotDeletedException;
 import ru.soliev.practice.banners.exceptions.CategoryNotFoundException;
 
+import ru.soliev.practice.banners.exceptions.CategoryNotUpdatedException;
 import ru.soliev.practice.banners.models.Banner;
 import ru.soliev.practice.banners.models.Category;
 import ru.soliev.practice.banners.repositories.BannerRepository;
@@ -53,9 +55,15 @@ public class CategoryService {
     }
 
     @Transactional(readOnly = true)
-    public Category findByName(String name) {
+    public Category findByName(String name) throws CategoryNotFoundException {
+        return categoryRepository.findByName(name).orElseThrow(() -> new CategoryNotFoundException("Category with name " + name + " was not found"));
+    }
+
+    @Transactional(readOnly = true)
+    public Category findByNameForValidate(String name) {
         return categoryRepository.findByName(name).orElse(null);
     }
+
 
     @Transactional(readOnly = true)
     public Category findByReqName(String reqName) {
@@ -67,9 +75,31 @@ public class CategoryService {
         return categoryRepository.findByReqNameAndDeletedFalse(reqName).orElseThrow(()
                 -> new CategoryNotFoundException("Category with reqName " + reqName + " was not found"));
     }
-    public void update(int id, Category updatedCategory) {
-        updatedCategory.setId(id);
-        categoryRepository.save(updatedCategory);
+
+    @Transactional(readOnly = true)
+    public Category findByNameAndDeletedFalse(String name) throws CategoryNotFoundException {
+        return categoryRepository.findByNameAndDeletedFalse(name).orElseThrow(()
+                -> new CategoryNotFoundException("Category with name " + name + " was not found"));
+    }
+
+    public void update(int id, UpdateCategoryDTO updateCategoryDTO) throws CategoryNotFoundException, CategoryNotUpdatedException {
+        int modCount = 0;
+        Category category = categoryRepository.findByIdAndDeletedFalse(id).
+                orElseThrow(() -> new CategoryNotFoundException("Category with id " + id + " was not found"));
+
+        if (updateCategoryDTO.getName() != null){
+            category.setName(updateCategoryDTO.getName());
+            modCount += 1;
+        }
+
+        if (updateCategoryDTO.getReqName() != null) {
+            category.setReqName(updateCategoryDTO.getReqName());
+            modCount +=1;
+        }
+
+        if (modCount == 0)
+            throw new CategoryNotUpdatedException("Category was not updated");
+        saveCategory(category);
     }
 
     @Transactional
@@ -98,7 +128,7 @@ public class CategoryService {
                 .orElseThrow(() -> new CategoryNotFoundException("Category with bannerId = " + bannerId + " was not found"));
     }
 
-    public void save(Category category) {
+    public void saveCategory(Category category) {
         categoryRepository.save(category);
     }
 

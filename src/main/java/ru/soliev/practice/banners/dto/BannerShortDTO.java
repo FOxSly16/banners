@@ -1,4 +1,6 @@
 package ru.soliev.practice.banners.dto;
 
-public record BannerShortDTO(int price, String name, String content) {
+import java.math.BigDecimal;
+
+public record BannerShortDTO(BigDecimal price, String name, String content) {
 }

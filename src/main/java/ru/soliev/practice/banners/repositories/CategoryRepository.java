@@ -28,4 +28,6 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
     Optional<Category> findByBanners_Id(int id);
 
     Optional<Category> findByReqNameAndDeletedFalse(String reqName);
+
+    Optional<Category> findByNameAndDeletedFalse(String name);
 }

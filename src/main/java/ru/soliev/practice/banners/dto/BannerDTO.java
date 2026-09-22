@@ -16,7 +16,7 @@ public class BannerDTO {
     private BigDecimal price;
 
     @NotNull
-    private int categoryId;
+    private Integer categoryId;
 
     @NotBlank
     private String content;

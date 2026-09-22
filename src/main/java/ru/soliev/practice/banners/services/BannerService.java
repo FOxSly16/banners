@@ -1,20 +1,17 @@
 package ru.soliev.practice.banners.services;
 
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.soliev.practice.banners.dto.UpdateBannerDTO;
 import ru.soliev.practice.banners.exceptions.BannerNotFoundException;
+import ru.soliev.practice.banners.exceptions.BannerNotUpdatedException;
 import ru.soliev.practice.banners.exceptions.CategoryNotFoundException;
 import ru.soliev.practice.banners.models.Banner;
-import ru.soliev.practice.banners.models.Category;
 import ru.soliev.practice.banners.repositories.BannerRepository;
-import ru.soliev.practice.banners.repositories.CategoryRepository;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class BannerService {
@@ -51,9 +48,35 @@ public class BannerService {
     }
 
     @Transactional
-    public void update(int id, Banner updatedBanner, int categoryId) throws CategoryNotFoundException {
-        updatedBanner.setId(id);
-        addBanner(updatedBanner, categoryId);
+    public void update(int id, UpdateBannerDTO updateBannerDTO) throws CategoryNotFoundException, BannerNotFoundException, BannerNotUpdatedException {
+
+        int modCount = 0;
+        Banner banner = bannerRepository.findByIdAndDeletedFalse(id).
+                orElseThrow(() -> new BannerNotFoundException("Banner with id " + id + " was not found"));
+
+        if (updateBannerDTO.getCategoryName() != null) {
+            banner.setCategory(categoryService.findByNameAndDeletedFalse(updateBannerDTO.getCategoryName()));
+            modCount += 1;
+        }
+
+        if (updateBannerDTO.getContent() != null) {
+            banner.setContent(updateBannerDTO.getContent());
+            modCount += 1;
+        }
+
+        if (updateBannerDTO.getName() != null) {
+            banner.setName(updateBannerDTO.getName());
+            modCount += 1;
+        }
+
+        if (updateBannerDTO.getPrice() != null) {
+            banner.setPrice(updateBannerDTO.getPrice());
+            modCount += 1;
+        }
+
+        if (modCount == 0)
+            throw new BannerNotUpdatedException("Banner was not updated");
+        saveBanner(banner);
     }
 
     @Transactional
@@ -64,22 +87,13 @@ public class BannerService {
 
     @Transactional(readOnly = true)
     public List<Banner> search(String query) throws BannerNotFoundException {
-        if (bannerRepository.findByQuery(query).isEmpty())
-            throw new BannerNotFoundException("Banners start with " + query + " was not found");
         return bannerRepository.findByQuery(query);
     }
 
     @Transactional
-    public void save(Banner banner) throws CategoryNotFoundException {
-        addBanner(banner, banner.getCategory().getId());
-    }
+    public void saveBanner(Banner banner) throws CategoryNotFoundException {
+        banner.getCategory().getBanners().add(banner);
 
-    @Transactional
-    public void addBanner(Banner banner, int categoryId) throws CategoryNotFoundException {
-        Category category = categoryService.findById(categoryId);
-        category.getBanners().add(banner);
-
-        banner.setCategory(category);
         bannerRepository.save(banner);
     }
 

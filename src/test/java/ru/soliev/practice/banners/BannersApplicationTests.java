@@ -9,5 +9,4 @@ class BannersApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
 }

@@ -13,6 +13,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import ru.soliev.practice.banners.Mappers.CategoryMapper;
 import ru.soliev.practice.banners.dto.CategoryDTO;
+import ru.soliev.practice.banners.dto.UpdateCategoryDTO;
 import ru.soliev.practice.banners.exceptions.CategoryNotCreatedException;
 import ru.soliev.practice.banners.exceptions.CategoryNotFoundException;
 import ru.soliev.practice.banners.exceptions.CategoryNotUpdatedException;
@@ -25,7 +26,7 @@ import ru.soliev.practice.banners.util.UpdateCategoryValidator;
 import java.util.List;
 
 @RestController
-@RequestMapping("/category")
+@RequestMapping("/categories")
 public class CategoryController {
 
     private final CategoryService categoryService;
@@ -42,7 +43,7 @@ public class CategoryController {
     }
 
     @GetMapping
-    public List<CategoryDTO> index(@RequestParam(value = "query", required = false) String query) throws CategoryNotFoundException {
+    public List<CategoryDTO> getCategories(@RequestParam(value = "query", required = false) String query) throws CategoryNotFoundException {
 
         if (query != null)
             return categoryMapper.toCategoryDTOList(categoryService.search(query));
@@ -50,7 +51,7 @@ public class CategoryController {
     }
 
     @GetMapping("/{id}")
-    public CategoryDTO show(@PathVariable ("id") int id) throws CategoryNotFoundException {
+    public CategoryDTO getCategoryById(@PathVariable ("id") int id) throws CategoryNotFoundException {
         return categoryMapper.toCategoryDTO(categoryService.findById(id));
     }
 
@@ -65,26 +66,28 @@ public class CategoryController {
             throw new CategoryNotCreatedException(createErrorMsg(bindingResult));
         }
 
-        categoryService.save(category);
+        categoryService.saveCategory(category);
         return new ResponseEntity<>(category.getId(), HttpStatus.OK);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<HttpStatus> update(@RequestBody @Valid CategoryDTO updatedCategoryDTO,
+    @ResponseStatus(HttpStatus.OK)
+    public void update(@RequestBody @Valid UpdateCategoryDTO updateCategoryDTO,
                                              BindingResult bindingResult,
                                              @PathVariable("id") int id) throws CategoryNotFoundException, CategoryNotUpdatedException {
 
-        Category updatedCategory = categoryMapper.toEntity(updatedCategoryDTO);
-        updatedCategory.setId(id);
+        if (updateCategoryDTO.getName() != null || updateCategoryDTO.getReqName() != null) {
+            Category updatedCategory = categoryMapper.toEntity(updateCategoryDTO);
+            updatedCategory.setId(id);
 
-        updateCategoryValidator.validate(updatedCategory, bindingResult);
+            updateCategoryValidator.validate(updatedCategory, bindingResult);
+        }
 
         if (bindingResult.hasErrors()) {
             throw new CategoryNotUpdatedException(createErrorMsg(bindingResult));
         }
 
-        categoryService.update(id, updatedCategory);
-        return new ResponseEntity<>(HttpStatus.OK);
+        categoryService.update(id, updateCategoryDTO);
     }
 
     @DeleteMapping("/{id}")
@@ -95,7 +98,7 @@ public class CategoryController {
         if (!banners.isEmpty())
             return new ResponseEntity<>(banners.stream().map(Banner::getId).toList(), HttpStatus.CONFLICT);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     public String createErrorMsg(BindingResult bindingResult) {

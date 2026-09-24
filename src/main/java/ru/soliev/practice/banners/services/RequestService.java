@@ -43,16 +43,9 @@ public class RequestService{
         requestRepository.save(request);
     }
 
-    @Transactional(readOnly = true)
-    public boolean hasBannerShowed(int bannerId, Request request) {
-        String ip = request.getIp();
-        String userAgent = request.getUserAgent();
-        LocalDateTime time = request.getTime();
-
-        List<Request> requests = requestRepository.findByIpAndUserAgentAndBanner_IdAndTimeGreaterThan(ip, userAgent,
-                bannerId, time.minusMinutes(1));
-
-        return !requests.isEmpty();
+    @Transactional
+    public List<Request> findRequest(String ip, String userAgent, int bannerId, LocalDateTime time) {
+        return requestRepository.findByIpAndUserAgentAndBanner_IdAndTimeGreaterThan(ip, userAgent, bannerId, time);
     }
 
     public boolean hasShowed(Banner banner) {

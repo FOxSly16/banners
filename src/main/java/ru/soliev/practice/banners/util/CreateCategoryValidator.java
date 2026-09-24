@@ -26,7 +26,7 @@ public class CreateCategoryValidator implements Validator {
     public void validate(Object target, Errors errors) {
         Category category = (Category) target;
 
-        if (categoryService.findByName(category.getName()) != null) {
+        if (categoryService.findByNameForValidate(category.getName()) != null) {
             errors.rejectValue("name", "", "This name is already taken");
         }
 

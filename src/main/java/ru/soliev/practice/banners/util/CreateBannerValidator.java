@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
+import ru.soliev.practice.banners.dto.CreateBannerDTO;
 import ru.soliev.practice.banners.models.Banner;
 import ru.soliev.practice.banners.models.Category;
 import ru.soliev.practice.banners.services.BannerService;
@@ -25,9 +26,9 @@ public class CreateBannerValidator implements Validator {
 
     @Override
     public void validate(Object target, Errors errors) {
-        Banner banner = (Banner) target;
+        String name = (String) target;
 
-        if (bannerService.findByName(banner.getName()) != null) {
+        if (bannerService.findByName(name) != null) {
             errors.rejectValue("name", "", "This name is already taken");
         }
     }

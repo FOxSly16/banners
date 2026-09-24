@@ -24,7 +24,6 @@ public class Category {
     private String reqName;
 
     @Column(name = "deleted")
-    @NotNull
     private boolean deleted;
 
     @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)

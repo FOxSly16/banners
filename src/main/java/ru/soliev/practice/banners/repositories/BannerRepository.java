@@ -24,6 +24,8 @@ public interface BannerRepository extends JpaRepository<Banner, Integer> {
 
     Optional<Banner> findByName(String name);
 
+    List<Banner> findByCategory_ReqNameAndDeletedFalse(String reqName);
+
 
     @Query("SELECT b FROM Banner b WHERE b.deleted = false AND LOWER(b.name) LIKE CONCAT(LOWER(:query), '%')")
     List<Banner> findByQuery(String query);

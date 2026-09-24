@@ -10,5 +10,5 @@ import java.util.List;
 @Repository
 public interface RequestRepository extends JpaRepository<Request, Integer> {
 
-    List<Request> findByIpAndUserAgentAndBanner_IdAndTimeGreaterThan(String ip, String userAgent, int id, LocalDateTime time);
+    List<Request> findByIpAndUserAgentAndBanner_IdAndTimeGreaterThan(String ip, String userAgent, int bannerId, LocalDateTime time);
 }

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.soliev.practice.banners.dto.BannerDTO;
 import ru.soliev.practice.banners.exceptions.CategoryNotFoundException;
 import ru.soliev.practice.banners.models.Banner;
+import ru.soliev.practice.banners.models.Category;
 import ru.soliev.practice.banners.models.Request;
 import ru.soliev.practice.banners.services.BannerService;
 import ru.soliev.practice.banners.services.CategoryService;

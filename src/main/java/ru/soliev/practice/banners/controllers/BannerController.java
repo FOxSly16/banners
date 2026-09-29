@@ -1,6 +1,7 @@
 package ru.soliev.practice.banners.controllers;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -18,7 +19,6 @@ import ru.soliev.practice.banners.exceptions.CategoryNotFoundException;
 import ru.soliev.practice.banners.managers.BannerManager;
 import ru.soliev.practice.banners.models.Banner;
 import ru.soliev.practice.banners.services.BannerService;
-import ru.soliev.practice.banners.services.CategoryService;
 import ru.soliev.practice.banners.util.CreateBannerValidator;
 import ru.soliev.practice.banners.util.UpdateBannerValidator;
 
@@ -26,6 +26,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/banners")
+@RequiredArgsConstructor
 public class BannerController {
 
     private final BannerService bannerService;
@@ -33,15 +34,6 @@ public class BannerController {
     private final UpdateBannerValidator updateBannerValidator;
     private final BannerMapper bannerMapper;
     private final BannerManager bannerManager;
-
-    public BannerController(BannerService bannerService, CreateBannerValidator createBannerValidator,
-                            UpdateBannerValidator updateBannerValidator, CategoryService categoryService, BannerMapper bannerMapper, CategoryService categoryService1, BannerManager bannerManager) {
-        this.bannerService = bannerService;
-        this.createBannerValidator = createBannerValidator;
-        this.updateBannerValidator = updateBannerValidator;
-        this.bannerMapper = bannerMapper;
-        this.bannerManager = bannerManager;
-    }
 
     @GetMapping
     public List<BannerShortDTO> getBanners(@RequestParam(value = "query", required = false) String query) throws BannerNotFoundException {

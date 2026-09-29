@@ -1,5 +1,6 @@
 package ru.soliev.practice.banners.services;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,19 +20,13 @@ import ru.soliev.practice.banners.repositories.CategoryRepository;
 import java.util.List;
 import java.util.Optional;
 
-
+@RequiredArgsConstructor
 @Service
 @Transactional
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final BannerRepository bannerRepository;
-
-    @Autowired
-    public CategoryService(CategoryRepository categoryRepository, BannerRepository bannerRepository) {
-        this.categoryRepository = categoryRepository;
-        this.bannerRepository = bannerRepository;
-    }
 
     @Transactional(readOnly = true)
     public List<Category> findAll() {

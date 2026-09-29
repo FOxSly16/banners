@@ -1,13 +1,9 @@
 package ru.soliev.practice.banners.controllers;
 
 import jakarta.validation.Valid;
-import org.mapstruct.Mapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -27,20 +23,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/categories")
+@RequiredArgsConstructor
 public class CategoryController {
 
     private final CategoryService categoryService;
     private final CreateCategoryValidator createCategoryValidator;
     private final UpdateCategoryValidator updateCategoryValidator;
     private final CategoryMapper categoryMapper;
-
-    @Autowired
-    public CategoryController(CategoryService categoryService, CreateCategoryValidator createCategoryValidator, UpdateCategoryValidator updateCategoryValidator, CategoryMapper categoryMapper) {
-        this.categoryService = categoryService;
-        this.createCategoryValidator = createCategoryValidator;
-        this.updateCategoryValidator = updateCategoryValidator;
-        this.categoryMapper = categoryMapper;
-    }
 
     @GetMapping
     public List<CategoryDTO> getCategories(@RequestParam(value = "query", required = false) String query) throws CategoryNotFoundException {

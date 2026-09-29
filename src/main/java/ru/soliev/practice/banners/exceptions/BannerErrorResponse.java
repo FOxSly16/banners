@@ -1,30 +1,15 @@
 package ru.soliev.practice.banners.exceptions;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
+@AllArgsConstructor
 public class BannerErrorResponse {
-
     private String msg;
     private LocalDateTime time;
-
-    public BannerErrorResponse(LocalDateTime time, String msg) {
-        this.time = time;
-        this.msg = msg;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
-
-    public void setMsg(String msg) {
-        this.msg = msg;
-    }
-
-    public LocalDateTime getTime() {
-        return time;
-    }
-
-    public void setTime(LocalDateTime time) {
-        this.time = time;
-    }
 }

@@ -1,21 +1,17 @@
 package ru.soliev.practice.banners.util;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import ru.soliev.practice.banners.models.Category;
 import ru.soliev.practice.banners.services.CategoryService;
 
+@RequiredArgsConstructor
 @Component
 public class UpdateCategoryValidator implements Validator {
 
     private final CategoryService categoryService;
-
-    @Autowired
-    public UpdateCategoryValidator(CategoryService categoryService) {
-        this.categoryService = categoryService;
-    }
 
     @Override
     public boolean supports(Class<?> clazz) {

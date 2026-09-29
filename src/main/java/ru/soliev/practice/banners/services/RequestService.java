@@ -1,6 +1,7 @@
 package ru.soliev.practice.banners.services;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,15 +12,11 @@ import ru.soliev.practice.banners.repositories.RequestRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@RequiredArgsConstructor
 @Service
 public class RequestService{
 
     private final RequestRepository requestRepository;
-
-    @Autowired
-    public RequestService(RequestRepository requestRepository) {
-        this.requestRepository = requestRepository;
-    }
 
     public Request createRequest(HttpServletRequest httpServletRequest) {
 

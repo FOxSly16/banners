@@ -1,5 +1,6 @@
 package ru.soliev.practice.banners.services;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,17 +14,12 @@ import ru.soliev.practice.banners.repositories.BannerRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@RequiredArgsConstructor
 @Service
 public class BannerService {
 
     private final BannerRepository bannerRepository;
     private final CategoryService categoryService;
-
-    @Autowired
-    public BannerService(BannerRepository bannerRepository, CategoryService categoryService) {
-        this.bannerRepository = bannerRepository;
-        this.categoryService = categoryService;
-    }
 
     @Transactional(readOnly = true)
     public List<Banner> findAll() {

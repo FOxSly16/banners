@@ -2,8 +2,6 @@ package ru.soliev.practice.banners.Mappers;
 
 import org.mapstruct.*;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import ru.soliev.practice.banners.dto.CreateBannerDTO;
 import ru.soliev.practice.banners.dto.BannerShortDTO;
 import ru.soliev.practice.banners.dto.BannerDTO;

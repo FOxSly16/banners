@@ -1,29 +1,16 @@
 package ru.soliev.practice.banners.exceptions;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
+@Setter
+@Getter
+@AllArgsConstructor
 public class CategoryErrorResponse {
-    LocalDateTime time;
-    String msg;
+    private String msg;
+    private LocalDateTime time;
 
-    public CategoryErrorResponse(String msg, LocalDateTime time) {
-        this.msg = msg;
-        this.time = time;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
-
-    public void setMsg(String msg) {
-        this.msg = msg;
-    }
-
-    public LocalDateTime getTime() {
-        return time;
-    }
-
-    public void setTime(LocalDateTime time) {
-        this.time = time;
-    }
 }
